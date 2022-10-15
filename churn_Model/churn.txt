@@ -1,0 +1,121 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+# churn model
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# read data 
+
+basedata = pd.read_csv(r'/Users/thanujaavvari/Desktop/Churnb.csv')
+
+
+basedata.describe()
+columns = basedata.columns.values.tolist()
+print(columns)
+print(basedata)
+
+
+basedata1 = basedata.drop(['RowNumber', 'CustomerId', 'Surname'], axis=1)
+
+columns1 = basedata1.columns.values.tolist()
+print(columns1)
+
+print(basedata1.head(10))
+print(basedata1.info())
+
+#replace credit score black data with mean due to outlier
+
+x = basedata1["CreditScore"].mean()
+
+print(x)
+
+
+#tenure outlier
+for y in basedata1.index:
+  if basedata1.loc[y, "Tenure"] > 10:
+    basedata1.loc[y, "Tenure"] = 10
+
+
+
+
+basedata1["CreditScore"].fillna(x, inplace = True)
+
+print(basedata1.info())
+
+#gender replacement from nutural (outlier)
+
+g = basedata1["Gender"].mode()
+
+print(g)
+
+for x in basedata1.index:
+  if basedata1.loc[x, "Gender"] == 'Neutral':
+    basedata1.loc[x, "Gender"] == g
+    
+Geography = pd.get_dummies(basedata1.Geography).iloc[:,1:]
+Gender = pd.get_dummies(basedata1.Gender).iloc[:,1:]
+
+print(basedata1)
+
+print(basedata1.duplicated())
+
+#remove duplicate rows
+
+basedata1.drop_duplicates(inplace = True)
+
+print(basedata1.head(10))
+print(basedata1.info())
+
+basedata2 = basedata1.drop(['Geography', 'Gender', 'age_B','Salary_B','balance_B','credit_B'], axis=1)
+
+print(basedata2.info()) 
+   
+   #correlation between the variables 
+   
+corrl = basedata2.corr()
+   
+print(corrl)
+   
+
+X1 =  basedata2.drop(['Exited'], axis=1)
+y1 = basedata2['Exited']
+
+#creating train and test dataset
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X1, y1, test_size = 0.3, random_state = 0)
+   
+
+from sklearn.ensemble import RandomForestClassifier
+classifier = RandomForestClassifier(n_estimators=200, random_state=0) 
+classifier.fit(X_train, y_train) 
+predictions = classifier.predict(X_test)
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+print(classification_report(y_test,predictions )) 
+print(accuracy_score(y_test, predictions ))
+
+#evaluation
+
+feat_importances = pd.Series(classifier.feature_importances_, index=X1.columns)
+feat_importances.nlargest(10).plot(kind='barh')
+colors=['blue', 'orange', 'green', 'red','firebrick','grey','seagreen','tomato','aqua','purple'] 
+
+feat_importances.nlargest(10).plot(kind='barh').colors=['blue', 'orange', 'green', 'red','firebrick','grey','seagreen','tomato','aqua','purple']
+
+to.plot()
+
+
+   
+   
+    	
+    
+    
+    
